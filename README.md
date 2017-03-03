@@ -1,11 +1,11 @@
-# ember-tasks
+# ember-evented-tasks
 
 This README outlines the details of collaborating on this Ember addon.
 
 ## Installation
 
 * `git clone <repository-url>` this repository
-* `cd ember-tasks`
+* `cd ember-evented-tasks`
 * `npm install`
 * `bower install`
 

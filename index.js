@@ -2,5 +2,5 @@
 'use strict';
 
 module.exports = {
-  name: 'ember-tasks'
+  name: 'ember-evented-tasks'
 };

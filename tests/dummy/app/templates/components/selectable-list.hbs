@@ -1,0 +1,7 @@
+<ol>
+  {{#each items as |item|}}
+    <li class="{{if item.selected 'selected'}}">
+      {{item.name}}
+    </li>
+  {{/each}}
+</ol>
