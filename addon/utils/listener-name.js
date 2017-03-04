@@ -9,6 +9,6 @@ function gatherKeys(event) {
   }, []);
 }
 
-export default function listenerName(type, event) {
+export function listenerName(type, event) {
   return ekbListenerName(type, gatherKeys(event));
 }

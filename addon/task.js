@@ -14,27 +14,27 @@ export default Ember.Object.extend({
   disabled: false,
 
   _events: null,
-  _registers: null,
+  _subscribers: null,
 
   init() {
     this._super(...arguments);
 
     this.set('_events', {});
-    this.set('_registers', emberArray([]));
-    this.subscribeEvents();
+    this.set('_subscribers', emberArray([]));
+    this.registerEvents();
   },
 
   destroy() {
     this._super(...arguments);
 
-    this.get('_registers').forEach(s => this.unsubscribe(s));
+    this.get('_subscribers').forEach(s => this.unsubscribe(s));
     this.set('_events', null);
-    this.set('_registers', null);
+    this.set('_subscribers', null);
   },
 
-  subscribeEvents() {},
+  registerEvents() {},
 
-  subscribe(method, eventNames) {
+  register(method, eventNames) {
     let events = this.get('_events');
     let formattedEventNames = makeArray(eventNames).map(formatEventName);
 
@@ -43,28 +43,30 @@ export default Ember.Object.extend({
     }
 
     events[method].events.addObjects(formattedEventNames);
-    this._reregisterAll();
+    this._resubscribeAll();
+
+    console.log(events);
   },
 
-  unsubscribe(method, eventNames) {
+  unregister(method, eventNames) {
     let events = this.get('_events');
     let taskEvent = events[method];
 
     if (taskEvent) {
       let formattedEventNames = makeArray(eventNames).map(formatEventName);
       taskEvent.events.removeObjects(formattedEventNames);
-      this._reregisterAll();
+      this._resubscribeAll();
     }
   },
 
-  register(context) {
-    let registers = this.get('_registers');
+  subscribe(context) {
+    let subscribers = this.get('_subscribers');
 
-    this._register(context);
-    registers.addObject(context);
+    this._subscribe(context);
+    subscribers.addObject(context);
   },
 
-  _register(context) {
+  _subscribe(context) {
     let disabled = this.get('disabled');
     let events = this.get('_events');
 
@@ -87,12 +89,12 @@ export default Ember.Object.extend({
     });
   },
 
-  unregister(context) {
-    let registers = this.get('_registers');
+  unsubscribe(context) {
+    let subscribers = this.get('_subscribers');
     let events = this.get('_events');
 
-    this._unregister(context);
-    registers.removeObject(context);
+    this._unsubscribe(context);
+    subscribers.removeObject(context);
 
     Object.keys(events).forEach(methodName => {
       let taskEvent = events[methodName];
@@ -100,7 +102,7 @@ export default Ember.Object.extend({
     });
   },
 
-  _unregister(context) {
+  _unsubscribe(context) {
     let events = this.get('_events');
 
     assert(`${context} must be evented.`, isEventedObject(context));
@@ -111,21 +113,21 @@ export default Ember.Object.extend({
     });
   },
 
-  _reregisterAll() {
-    let registers = this.get('_registers');
+  _resubscribeAll() {
+    let subscribers = this.get('_subscribers');
 
-    registers.forEach(s => this._unregister(s));
-    registers.forEach(s => this._register(s));
+    subscribers.forEach(s => this._unsubscribe(s));
+    subscribers.forEach(s => this._subscribe(s));
   },
 
   _disabledDidChange: observer('disabled', function() {
     let disabled = this.get('disabled');
-    let registers = this.get('_registers');
+    let subscribers = this.get('_subscribers');
 
     if (disabled) {
-      registers.forEach(s => this._unregister(s));
+      subscribers.forEach(s => this._unsubscribe(s));
     } else {
-      registers.forEach(s => this._register(s));
+      subscribers.forEach(s => this._subscribe(s));
     }
   })
 });

@@ -7,26 +7,26 @@ const {
 } = Ember;
 
 export default Ember.Mixin.create(Evented, {
-  _registerTasksAfterInit: on('init', function() {
-    this.registerTasks(this.get('tasks'));
+  _subscribeTasksAfterInit: on('init', function() {
+    this.subscribeTasks(this.get('tasks'));
   }),
 
   willDestroy() {
     this._super(...arguments);
-    this.unregisterTasks(this.get('tasks'));
+    this.unsubscribeTasks(this.get('tasks'));
   },
 
   willDestroyElement() {
     this._super(...arguments);
-    this.unregisterTasks(this.get('tasks'));
+    this.unsubscribeTasks(this.get('tasks'));
   },
 
-  registerTasks(tasks = []) {
-    tasks.forEach(t => t.register(this));
+  subscribeTasks(tasks = []) {
+    tasks.forEach(t => t.subscribe(this));
   },
 
-  unregisterTasks(tasks = []) {
-    tasks.forEach(t => t.unregister(this));
+  unsubscribeTasks(tasks = []) {
+    tasks.forEach(t => t.unsubscribe(this));
   },
 
   triggerTask(taskName, ...args) {
