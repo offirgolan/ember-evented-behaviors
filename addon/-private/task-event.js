@@ -13,17 +13,17 @@ export default class TaskEvent {
     this.subscribers = new WeakMap();
   }
 
-  _generateFnForObj(obj) {
+  _generateFnFor(obj) {
     return (...args) => {
       this.fn.call(this.target, obj, ...args);
     };
   }
 
   subscribe(obj) {
-    let subscribers = this.subscribers;
+    let { subscribers } = this;
 
     if (!subscribers.has(obj)) {
-      let fn = this._generateFnForObj(obj);
+      let fn = this._generateFnFor(obj);
 
       obj.on(this.name, this.target, fn);
       subscribers.set(obj, fn);
@@ -31,7 +31,7 @@ export default class TaskEvent {
   }
 
   unsubscribe(obj) {
-    let subscribers = this.subscribers;
+    let { subscribers } = this;
 
     if (subscribers.has(obj)) {
       obj.off(this.name, this.target, subscribers.get(obj));

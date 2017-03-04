@@ -22,11 +22,11 @@ export default Ember.Mixin.create(Evented, {
   },
 
   subscribeTasks(tasks = []) {
-    tasks.forEach(t => t.subscribe(this));
+    tasks.forEach((t) => t.subscribe(this));
   },
 
   unsubscribeTasks(tasks = []) {
-    tasks.forEach(t => t.unsubscribe(this));
+    tasks.forEach((t) => t.unsubscribe(this));
   },
 
   triggerTask(taskName, ...args) {

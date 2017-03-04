@@ -26,7 +26,7 @@ export default Ember.Object.extend({
   destroy() {
     this._super(...arguments);
 
-    this.get('_subscribers').forEach(s => this.unsubscribe(s));
+    this.get('_subscribers').forEach((s) => this.unsubscribe(s));
     this.set('_events', null);
     this.set('_subscribers', null);
   },
@@ -38,7 +38,7 @@ export default Ember.Object.extend({
 
     return events.find((event) => {
         return event._fn === method && event.name === name;
-    });
+      });
   },
 
   register(method, eventNames) {
@@ -49,7 +49,7 @@ export default Ember.Object.extend({
       events.pushObject(new TaskEvent(name, this, method));
     });
 
-    subscribers.forEach(s => this._subscribe(s));
+    subscribers.forEach((s) => this._subscribe(s));
   },
 
   unregister(method, eventNames) {
@@ -60,7 +60,7 @@ export default Ember.Object.extend({
       let foundEvent = this._findEvent(method, name);
 
       if (foundEvent) {
-        subscribers.forEach(s => foundEvent.unsubscribe(s));
+        subscribers.forEach((s) => foundEvent.unsubscribe(s));
         events.removeObject(foundEvent);
       }
     });
@@ -69,6 +69,8 @@ export default Ember.Object.extend({
   subscribe(obj) {
     let subscribers = this.get('_subscribers');
 
+    assert(`${obj} must be evented.`, isEventedObject(obj));
+
     this._subscribe(obj);
     subscribers.addObject(obj);
   },
@@ -76,8 +78,6 @@ export default Ember.Object.extend({
   _subscribe(obj) {
     let disabled = this.get('disabled');
     let events = this.get('_events');
-
-    assert(`${obj} must be evented.`, isEventedObject(obj));
 
     if (disabled) {
       return;
@@ -94,11 +94,7 @@ export default Ember.Object.extend({
   },
 
   _unsubscribe(obj) {
-    let events = this.get('_events');
-
-    assert(`${obj} must be evented.`, isEventedObject(obj));
-
-    events.forEach((event) => event.unsubscribe(obj));
+    this.get('_events').forEach((event) => event.unsubscribe(obj));
   },
 
   _disabledDidChange: observer('disabled', function() {
@@ -106,9 +102,9 @@ export default Ember.Object.extend({
     let subscribers = this.get('_subscribers');
 
     if (disabled) {
-      subscribers.forEach(s => this._unsubscribe(s));
+      subscribers.forEach((s) => this._unsubscribe(s));
     } else {
-      subscribers.forEach(s => this._subscribe(s));
+      subscribers.forEach((s) => this._subscribe(s));
     }
   })
 });
