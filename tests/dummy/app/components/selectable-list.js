@@ -40,7 +40,7 @@ export default Ember.Component.extend(EKMixin, EKOnFocusMixin, ETMixin, {
     let items = this.get('items');
 
     this.set('tasks', [
-      eventedTasks.lookup('select').create({ items })
+      eventedTasks.createTask('select', { items })
     ]);
   }
 });

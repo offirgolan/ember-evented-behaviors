@@ -20,6 +20,7 @@ export default Ember.Object.extend({
 
     this.set('_events', emberArray([]));
     this.set('_subscribers', emberArray([]));
+
     this.registerEvents();
   },
 
@@ -37,8 +38,8 @@ export default Ember.Object.extend({
     let events = this.get('_events');
 
     return events.find((event) => {
-        return event._fn === method && event.name === name;
-      });
+      return event._fn === method && event.name === name;
+    });
   },
 
   register(method, eventNames) {
@@ -46,10 +47,11 @@ export default Ember.Object.extend({
     let subscribers = this.get('_subscribers');
 
     makeArray(eventNames).forEach((name) => {
-      events.pushObject(new TaskEvent(name, this, method));
-    });
+      let taskEvent = new TaskEvent(name, this, method);
 
-    subscribers.forEach((s) => this._subscribe(s));
+      subscribers.forEach((s) => taskEvent.subscribe(s));
+      events.pushObject(taskEvent);
+    });
   },
 
   unregister(method, eventNames) {

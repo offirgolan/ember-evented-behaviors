@@ -1,5 +1,10 @@
+import Ember from 'ember';
 import formatEventName from 'ember-evented-tasks/utils/format-event-name';
 import WeakMap from 'ember-weakmap';
+
+const {
+  get
+} = Ember;
 
 export default class TaskEvent {
   constructor(name, target, fn) {
@@ -8,7 +13,7 @@ export default class TaskEvent {
 
     this.target = target;
     this.name = formatEventName(name);
-    this.fn = typeof fn === 'string' ? target[fn] : fn;
+    this.fn = typeof fn === 'string' ? get(target, fn) : fn;
 
     this.subscribers = new WeakMap();
   }

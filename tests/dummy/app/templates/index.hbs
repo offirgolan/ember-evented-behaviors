@@ -1,1 +1,5 @@
-{{selectable-list}}
+<button type="button" name="button" {{action (toggle 'showList' this)}}>Toggle List</button>
+
+{{#if showList}}
+  {{selectable-list}}
+{{/if}}

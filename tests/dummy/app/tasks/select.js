@@ -10,7 +10,9 @@ export default Task.extend({
   items: null,
 
   registerEvents() {
-    this.register('selectOne', 'onClick');
+    // TODO: Using `:all` doesnt really make much sense. Need to find a different
+    // keywork here...
+    this.register('selectOne', ['onClick:all', 'onClick:shift']);
     this.register(this.selectOneShift, 'onClick:shift');
     this.register('selectAll', keyDown('cmd+KeyA'));
   },
