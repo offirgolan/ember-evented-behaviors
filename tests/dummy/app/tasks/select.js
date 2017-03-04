@@ -11,20 +11,21 @@ export default Task.extend({
 
   registerEvents() {
     this.register('selectOne', 'onClick');
-    this.register('selectOneShift', 'onClick:shift');
+    this.register(this.selectOneShift, 'onClick:shift');
     this.register('selectAll', keyDown('cmd+KeyA'));
   },
 
   selectOne() {
-    console.log('Selected one', ...arguments);
+    console.log('Selected one');
   },
 
   selectOneShift() {
-    console.log('Selected one + shift', ...arguments);
+    console.log('Selected one + shift');
+    this.unregister(this.selectOneShift, 'onClick:shift');
   },
 
   selectAll(context, e) {
-    console.log('Selected All', ...arguments);
+    console.log('Selected All');
     e.preventDefault();
 
     let items = this.get('items');

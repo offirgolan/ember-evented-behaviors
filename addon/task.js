@@ -1,6 +1,5 @@
 import Ember from 'ember';
 import TaskEvent from 'ember-evented-tasks/-private/task-event';
-import formatEventName from 'ember-evented-tasks/utils/format-event-name';
 import isEventedObject from 'ember-evented-tasks/utils/is-evented-object';
 
 const {
@@ -19,7 +18,7 @@ export default Ember.Object.extend({
   init() {
     this._super(...arguments);
 
-    this.set('_events', {});
+    this.set('_events', emberArray([]));
     this.set('_subscribers', emberArray([]));
     this.registerEvents();
   },
@@ -34,90 +33,72 @@ export default Ember.Object.extend({
 
   registerEvents() {},
 
+  _findEvent(method, name) {
+    let events = this.get('_events');
+
+    return events.find((event) => {
+        return event._fn === method && event.name === name;
+    });
+  },
+
   register(method, eventNames) {
     let events = this.get('_events');
-    let formattedEventNames = makeArray(eventNames).map(formatEventName);
+    let subscribers = this.get('_subscribers');
 
-    if (!events[method]) {
-      events[method] = new TaskEvent();
-    }
+    makeArray(eventNames).forEach((name) => {
+      events.pushObject(new TaskEvent(name, this, method));
+    });
 
-    events[method].events.addObjects(formattedEventNames);
-    this._resubscribeAll();
-
-    console.log(events);
+    subscribers.forEach(s => this._subscribe(s));
   },
 
   unregister(method, eventNames) {
     let events = this.get('_events');
-    let taskEvent = events[method];
-
-    if (taskEvent) {
-      let formattedEventNames = makeArray(eventNames).map(formatEventName);
-      taskEvent.events.removeObjects(formattedEventNames);
-      this._resubscribeAll();
-    }
-  },
-
-  subscribe(context) {
     let subscribers = this.get('_subscribers');
 
-    this._subscribe(context);
-    subscribers.addObject(context);
+    makeArray(eventNames).forEach((name) => {
+      let foundEvent = this._findEvent(method, name);
+
+      if (foundEvent) {
+        subscribers.forEach(s => foundEvent.unsubscribe(s));
+        events.removeObject(foundEvent);
+      }
+    });
   },
 
-  _subscribe(context) {
+  subscribe(obj) {
+    let subscribers = this.get('_subscribers');
+
+    this._subscribe(obj);
+    subscribers.addObject(obj);
+  },
+
+  _subscribe(obj) {
     let disabled = this.get('disabled');
     let events = this.get('_events');
 
-    assert(`${context} must be evented.`, isEventedObject(context));
+    assert(`${obj} must be evented.`, isEventedObject(obj));
 
     if (disabled) {
       return;
     }
 
-    Object.keys(events).forEach(methodName => {
-      let taskEvent = events[methodName];
-
-      if (!taskEvent.hasMethod(context)) {
-        taskEvent.setMethod(context, function() {
-          this[methodName](context, ...arguments);
-        });
-      }
-
-      taskEvent.events.forEach(eventName => context.on(eventName, this, taskEvent.getMethod(context)));
-    });
+    events.forEach((event) => event.subscribe(obj));
   },
 
-  unsubscribe(context) {
-    let subscribers = this.get('_subscribers');
-    let events = this.get('_events');
-
-    this._unsubscribe(context);
-    subscribers.removeObject(context);
-
-    Object.keys(events).forEach(methodName => {
-      let taskEvent = events[methodName];
-      taskEvent.setMethod(context, null);
-    });
-  },
-
-  _unsubscribe(context) {
-    let events = this.get('_events');
-
-    assert(`${context} must be evented.`, isEventedObject(context));
-
-    Object.keys(events).forEach(methodName => {
-      let taskEvent = events[methodName];
-      taskEvent.events.forEach(eventName => context.off(eventName, this, taskEvent.getMethod(context)));
-    });
-  },
-
-  _resubscribeAll() {
+  unsubscribe(obj) {
     let subscribers = this.get('_subscribers');
 
-    subscribers.forEach(s => this._unsubscribe(s));
-    subscribers.forEach(s => this._subscribe(s));
+    this._unsubscribe(obj);
+    subscribers.removeObject(obj);
+  },
+
+  _unsubscribe(obj) {
+    let events = this.get('_events');
+
+    assert(`${obj} must be evented.`, isEventedObject(obj));
+
+    events.forEach((event) => event.unsubscribe(obj));
   },
 
   _disabledDidChange: observer('disabled', function() {
