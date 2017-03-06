@@ -1,5 +1,4 @@
 import Ember from 'ember';
-import formatEventName from 'ember-evented-tasks/utils/format-event-name';
 import WeakMap from 'ember-weakmap';
 
 const {
@@ -7,31 +6,23 @@ const {
 } = Ember;
 
 export default class TaskEvent {
-  constructor(name, target, fn) {
-    this._name = name;
-    this._fn = fn;
-
+  constructor(name, target, method) {
     this.target = target;
-    this.name = formatEventName(name);
-    this.fn = typeof fn === 'string' ? get(target, fn) : fn;
-
+    this.name = name;
+    this.method = method;
     this.subscribers = new WeakMap();
-  }
 
-  _generateFnFor(obj) {
-    return (...args) => {
-      this.fn.call(this.target, obj, ...args);
-    };
+    this._method = typeof method === 'string' ? get(target, method) : method;
   }
 
   subscribe(obj) {
     let { subscribers } = this;
 
     if (!subscribers.has(obj)) {
-      let fn = this._generateFnFor(obj);
+      let method = this._generateMethodFor(obj);
 
-      obj.on(this.name, this.target, fn);
-      subscribers.set(obj, fn);
+      obj.on(this.name, this.target, method);
+      subscribers.set(obj, method);
     }
   }
 
@@ -42,5 +33,11 @@ export default class TaskEvent {
       obj.off(this.name, this.target, subscribers.get(obj));
       subscribers.delete(obj);
     }
+  }
+
+  _generateMethodFor(obj) {
+    return (...args) => {
+      this._method.call(this.target, obj, ...args);
+    };
   }
 }

@@ -1,5 +1,5 @@
 import Ember from 'ember';
-import Task from 'ember-evented-tasks';
+import Task, { onEvent } from 'ember-evented-tasks';
 import { keyDown } from 'ember-keyboard';
 
 const {
@@ -10,11 +10,10 @@ export default Task.extend({
   items: null,
 
   registerEvents() {
-    // TODO: Using `:all` doesnt really make much sense. Need to find a different
-    // keywork here...
-    this.register('selectOne', ['onClick:all', 'onClick:shift']);
-    this.register(this.selectOneShift, 'onClick:shift');
+    this.register('selectOne', [ onEvent('click'), onEvent('click', 'shift+cmd') ]);
+    this.register(this.selectOneShift, onEvent('click', 'shift'));
     this.register('selectAll', keyDown('cmd+KeyA'));
+    this.register('unselectAll', keyDown('cmd+KeyU'));
   },
 
   selectOne() {
@@ -23,7 +22,7 @@ export default Task.extend({
 
   selectOneShift() {
     console.log('Selected one + shift');
-    this.unregister(this.selectOneShift, 'onClick:shift');
+    this.unregister(this.selectOneShift, 'click:shift');
   },
 
   selectAll(context, e) {
@@ -32,5 +31,13 @@ export default Task.extend({
 
     let items = this.get('items');
     items.forEach((i) => set(i, 'selected', true));
+  },
+
+  unselectAll(context, e) {
+    console.log('Unselected All');
+    e.preventDefault();
+
+    let items = this.get('items');
+    items.forEach((i) => set(i, 'selected', false));
   }
 });

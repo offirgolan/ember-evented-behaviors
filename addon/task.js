@@ -34,23 +34,19 @@ export default Ember.Object.extend({
 
   registerEvents() {},
 
-  _findEvent(method, name) {
-    let events = this.get('_events');
-
-    return events.find((event) => {
-      return event._fn === method && event.name === name;
-    });
-  },
-
   register(method, eventNames) {
     let events = this.get('_events');
     let subscribers = this.get('_subscribers');
 
     makeArray(eventNames).forEach((name) => {
-      let taskEvent = new TaskEvent(name, this, method);
+      let foundEvent = this._findEvent(method, name);
 
-      subscribers.forEach((s) => taskEvent.subscribe(s));
-      events.pushObject(taskEvent);
+      if (!foundEvent) {
+        let taskEvent = new TaskEvent(name, this, method);
+
+        subscribers.forEach((s) => taskEvent.subscribe(s));
+        events.pushObject(taskEvent);
+      }
     });
   },
 
@@ -73,8 +69,11 @@ export default Ember.Object.extend({
 
     assert(`${obj} must be evented.`, isEventedObject(obj));
 
+    obj.__ee_tasks__ = obj.__ee_tasks__ || emberArray([]);
+
     this._subscribe(obj);
     subscribers.addObject(obj);
+    obj.__ee_tasks__.addObject(this);
   },
 
   _subscribe(obj) {
@@ -91,12 +90,23 @@ export default Ember.Object.extend({
   unsubscribe(obj) {
     let subscribers = this.get('_subscribers');
 
-    this._unsubscribe(obj);
-    subscribers.removeObject(obj);
+    if (subscribers.includes(obj)) {
+      this._unsubscribe(obj);
+      subscribers.removeObject(obj);
+      obj.__ee_tasks__.removeObject(this);
+    }
   },
 
   _unsubscribe(obj) {
     this.get('_events').forEach((event) => event.unsubscribe(obj));
+  },
+
+  _findEvent(method, name) {
+    let events = this.get('_events');
+
+    return events.find((event) => {
+      return event.method === method && event.name === name;
+    });
   },
 
   _disabledDidChange: observer('disabled', function() {
