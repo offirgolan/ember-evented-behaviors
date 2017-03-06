@@ -23,6 +23,6 @@ function formattedListener(type, keysString) {
   return listenerName(type, keys);
 }
 
-export function onEvent(eventName, keys = '') {
-  return formattedListener(eventName, keys);
+export function onEvent(eventName, keysString = '') {
+  return formattedListener(`onEvent:${eventName}`, keysString);
 }

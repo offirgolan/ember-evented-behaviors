@@ -8,7 +8,7 @@ const {
   run
 } = Ember;
 
-module('Unit | Task');
+module('Unit | Task | API');
 
 test('it works', function(assert) {
   assert.expect(5);
@@ -36,7 +36,7 @@ test('it works', function(assert) {
   eventedObject.subscribeTasks([ TaskClass.create() ]);
 
   run(() => {
-    eventedObject.triggerEvent('doFoo', 'foo');
-    eventedObject.triggerEvent('doBar');
+    eventedObject.trigger('doFoo', 'foo');
+    eventedObject.trigger('doBar');
   });
 });

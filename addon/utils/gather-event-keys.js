@@ -1,4 +1,4 @@
-import modifiers from 'ember-keyboard/fixtures/modifiers-array';
+import modifiers from 'ember-evented-tasks/fixtures/modifiers-array';
 
 export default function gatherEventKeys(event) {
   return modifiers.reduce((keys, keyName) => {

@@ -28,6 +28,11 @@ export default Ember.Component.extend(EKMixin, EKOnFocusMixin, ETMixin, {
     }];
   }),
 
+  click() {
+    this._super(...arguments);
+    this.trigger('onClick', ...arguments);
+  },
+
   init() {
     this._super(...arguments);
 

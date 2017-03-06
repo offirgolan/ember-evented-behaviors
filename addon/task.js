@@ -12,6 +12,7 @@ const {
 export default Ember.Object.extend({
   disabled: false,
 
+  // Private
   _events: null,
   _subscribers: null,
 
@@ -69,11 +70,13 @@ export default Ember.Object.extend({
 
     assert(`${obj} must be evented.`, isEventedObject(obj));
 
-    obj.__ee_tasks__ = obj.__ee_tasks__ || emberArray([]);
+    if (!subscribers.includes(obj)) {
+      obj.__ee_tasks__ = obj.__ee_tasks__ || emberArray([]);
 
-    this._subscribe(obj);
-    subscribers.addObject(obj);
-    obj.__ee_tasks__.addObject(this);
+      this._subscribe(obj);
+      subscribers.addObject(obj);
+      obj.__ee_tasks__.addObject(this);
+    }
   },
 
   _subscribe(obj) {

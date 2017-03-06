@@ -10,8 +10,8 @@ export default Task.extend({
   items: null,
 
   registerEvents() {
-    this.register('selectOne', [ onEvent('click'), onEvent('click', 'shift+cmd') ]);
-    this.register(this.selectOneShift, onEvent('click', 'shift'));
+    this.register('selectOne', [ onEvent('click'), onEvent('onClick', 'shift+cmd') ]);
+    this.register(this.selectOneShift, onEvent('onClick', 'shift'));
     this.register('selectAll', keyDown('cmd+KeyA'));
     this.register('unselectAll', keyDown('cmd+KeyU'));
   },
@@ -22,7 +22,7 @@ export default Task.extend({
 
   selectOneShift() {
     console.log('Selected one + shift');
-    this.unregister(this.selectOneShift, 'click:shift');
+    this.unregister(this.selectOneShift, onEvent('onClick', 'shift'));
   },
 
   selectAll(context, e) {

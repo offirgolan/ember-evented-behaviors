@@ -1,5 +1,15 @@
-import ekbListenerName from 'ember-keyboard/utils/listener-name';
+import translateCmdKey from 'ember-evented-tasks/utils/translate-cmd-key';
 
-export default function listenerName(/* name, keys */) {
-  return ekbListenerName(...arguments).replace(':_all', '');
+function sortedKeys(keyArray) {
+  return keyArray.sort().join('+');
+}
+
+export default function listenerName(type, keyArray = []) {
+  if (keyArray.includes('cmd')) {
+    keyArray[keyArray.indexOf('cmd')] = translateCmdKey();
+  }
+
+  let keys = keyArray.length === 0 ? '' : sortedKeys(keyArray);
+
+  return `${type}:${keys}`;
 }

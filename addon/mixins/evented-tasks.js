@@ -1,6 +1,4 @@
 import Ember from 'ember';
-import listenerName from 'ember-evented-tasks/utils/listener-name';
-import gatherEventKeys from 'ember-evented-tasks/utils/gather-event-keys';
 
 const {
   Evented
@@ -23,10 +21,5 @@ export default Ember.Mixin.create(Evented, {
 
   unsubscribeTasks(tasks = []) {
     tasks.forEach((t) => t.unsubscribe(this));
-  },
-
-  triggerEvent(taskName, ...args) {
-    let event = args.pop();
-    this.trigger(listenerName(taskName, gatherEventKeys(event)), ...args, event);
   }
 });
