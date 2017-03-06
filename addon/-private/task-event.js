@@ -7,11 +7,13 @@ const {
 } = Ember;
 
 export default class TaskEvent {
-  constructor(name, target, method) {
+  constructor(name, target, method, once = false) {
     this.target = target;
     this.name = name;
     this.method = method;
+    this.once = once;
     this.listeners = new WeakMap();
+    this.methodInvoked = new WeakMap();
 
     this.isEventedEvent = name.indexOf('onEvent:') === 0;
     this._method = typeof method === 'string' ? get(target, method) : method;
@@ -21,10 +23,10 @@ export default class TaskEvent {
     let { listeners } = this;
 
     if (!listeners.has(obj)) {
-      let objListeners = [ this._methodCallListenerFor(obj) ];
+      let objListeners = [ this._listenerFor(obj) ];
 
       if (this.isEventedEvent) {
-        objListeners.push(this._generalListenerFor(obj));
+        objListeners.push(this._eventedListenerFor(obj));
       }
 
       objListeners.forEach((listener) => {
@@ -55,7 +57,7 @@ export default class TaskEvent {
    * `onEvent:click:meta+shift`, we listen for all the `click` events on the
    * object and trigger this event if the keys match.
    */
-  _generalListenerFor(obj) {
+  _eventedListenerFor(obj) {
     // jscs:disable
     let nameSegments = this.name.split(':');
     let eventName = nameSegments[1];
@@ -74,11 +76,19 @@ export default class TaskEvent {
     };
   }
 
-  _methodCallListenerFor(obj) {
+  _listenerFor(obj) {
     return {
       name: this.name,
       target: this.target,
       method: (...args) => {
+        if (this.once) {
+          if (this.methodInvoked.has(obj)) {
+            return;
+          }
+
+          this.methodInvoked.set(obj, true);
+        }
+
         this._method.call(this.target, obj, ...args);
       }
     };

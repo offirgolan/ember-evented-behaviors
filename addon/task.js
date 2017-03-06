@@ -35,15 +35,15 @@ export default Ember.Object.extend({
 
   registerEvents() {},
 
-  register(method, eventNames) {
+  register(method, eventNames, once = false) {
     let events = this.get('_events');
     let subscribers = this.get('_subscribers');
 
     makeArray(eventNames).forEach((name) => {
-      let foundEvent = this._findEvent(method, name);
+      let foundEvent = this._findEvent(method, name, once);
 
       if (!foundEvent) {
-        let taskEvent = new TaskEvent(name, this, method);
+        let taskEvent = new TaskEvent(name, this, method, once);
 
         subscribers.forEach((s) => taskEvent.subscribe(s));
         events.pushObject(taskEvent);
@@ -51,12 +51,12 @@ export default Ember.Object.extend({
     });
   },
 
-  unregister(method, eventNames) {
+  unregister(method, eventNames, once = false) {
     let events = this.get('_events');
     let subscribers = this.get('_subscribers');
 
     makeArray(eventNames).forEach((name) => {
-      let foundEvent = this._findEvent(method, name);
+      let foundEvent = this._findEvent(method, name, once);
 
       if (foundEvent) {
         subscribers.forEach((s) => foundEvent.unsubscribe(s));
@@ -104,11 +104,13 @@ export default Ember.Object.extend({
     this.get('_events').forEach((event) => event.unsubscribe(obj));
   },
 
-  _findEvent(method, name) {
+  _findEvent(method, name, once) {
     let events = this.get('_events');
 
     return events.find((event) => {
-      return event.method === method && event.name === name;
+      return event.method === method &&
+             event.name === name &&
+             event.once === once;
     });
   },
 

@@ -10,8 +10,8 @@ const {
 
 export default Ember.Component.extend(EKMixin, EKOnFocusMixin, ETMixin, {
   layout,
-  eventedTasks: inject.service(),
-  tasks: null,
+  tasks: inject.service(),
+
   items: computed(function() {
     return [{
       name: 'One',
@@ -36,13 +36,11 @@ export default Ember.Component.extend(EKMixin, EKOnFocusMixin, ETMixin, {
   init() {
     this._super(...arguments);
 
-    let eventedTasks = this.get('eventedTasks');
+    let tasks = this.get('tasks');
     let items = this.get('items');
 
-    this.set('tasks', [
-      eventedTasks.createTask('select', { items })
+    this.subscribeTasks([
+      tasks.createTask('select', { items })
     ]);
-
-    this.subscribeTasks(this.get('tasks'));
   }
 });

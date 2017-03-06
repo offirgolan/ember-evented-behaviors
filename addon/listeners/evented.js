@@ -1,6 +1,6 @@
 import Ember from 'ember';
 import listenerName from 'ember-evented-tasks/utils/listener-name';
-import modifiers from 'ember-keyboard/fixtures/modifiers-array';
+import modifiers from 'ember-evented-tasks/fixtures/modifiers-array';
 
 const {
   isEmpty,
