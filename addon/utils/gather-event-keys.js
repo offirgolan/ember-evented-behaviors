@@ -6,5 +6,5 @@ export default function gatherEventKeys(event) {
       keys.push(keyName);
     }
     return keys;
-  }, []);
+  }, []).sort();
 }

@@ -10,7 +10,7 @@ const {
 
 module('Unit | Task | API');
 
-test('it works', function(assert) {
+test('general functionality', function(assert) {
   assert.expect(5);
 
   let eventedObject = EventedObject.create();

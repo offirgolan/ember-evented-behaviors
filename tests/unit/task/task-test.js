@@ -4,39 +4,77 @@ import Task, { onEvent, ETMixin } from 'ember-evented-tasks';
 
 const EventedObject = Ember.Object.extend(ETMixin);
 
-const {
-  run
-} = Ember;
-
 module('Unit | Task');
 
-test('it works', function(assert) {
-  assert.expect(5);
+test('registering events', function(assert) {
+  let task = Task.create();
+  let events = task.get('_events');
 
-  let eventedObject = EventedObject.create();
+  task.register('foo', onEvent('onFoo'));
+  assert.equal(events.length, 1, 'Should have 1 event registered');
 
-  let TaskClass = Task.extend({
-    registerEvents() {
-      this.register('foo', onEvent('doFoo'));
-      this.register(this.bar, onEvent('doBar'));
-    },
+  task.register('foo', onEvent('onFoo'));
+  assert.equal(events.length, 1, 'Should have 1 event registered');
 
-    foo(obj, name) {
-      assert.ok(true, 'Reached named method foo');
-      assert.equal(obj, eventedObject, 'Passed object context is correct');
-      assert.equal(name, 'foo', 'Passed name argument is correct');
-    },
+  task.register('foo', onEvent('onFoo'), true);
+  assert.equal(events.length, 2, 'Should have 2 events registered');
 
-    bar(obj) {
-      assert.ok(true, 'Reached referenced method bar');
-      assert.equal(obj, eventedObject, 'Passed object context is correct');
-    }
-  });
+  task.register('bar', onEvent('onBar'));
+  assert.equal(events.length, 3, 'Should have 3 events registered');
+});
 
-  eventedObject.subscribeTasks([ TaskClass.create() ]);
+test('unregistering events', function(assert) {
+  let task = Task.create();
+  let events = task.get('_events');
 
-  run(() => {
-    eventedObject.trigger('doFoo', 'foo');
-    eventedObject.trigger('doBar');
-  });
+  task.register('foo', onEvent('onFoo'));
+  task.register('bar', onEvent('onBar'));
+
+  assert.equal(events.length, 2, 'Should have 2 events registered');
+
+  // Unregister an event that has never been registered should not error
+  task.unregister('fooBar', onEvent('onFooBar'));
+  assert.equal(events.length, 2, 'Should have 2 events registered');
+
+  task.unregister('foo', onEvent('onFoo'));
+  assert.equal(events.length, 1, 'Should have 1 event registered');
+
+  task.unregister('bar', onEvent('onBar'));
+  assert.equal(events.length, 0, 'Should have 0 events registered');
+});
+
+test('subscribing objects', function(assert) {
+  let task = Task.create();
+  let subscribers = task.get('_subscribers');
+  let eventedObj = EventedObject.create();
+
+  assert.throws(() => task.subscribe(Ember.Object.create()), () => true, 'Non evented objects should throw an error');
+
+  task.subscribe(eventedObj);
+  assert.equal(subscribers.length, 1, 'Should have 1 subscriber');
+
+  task.subscribe(eventedObj);
+  assert.equal(subscribers.length, 1, 'Should have 1 subscriber');
+});
+
+test('unsubscribing objects', function(assert) {
+  let task = Task.create();
+  let subscribers = task.get('_subscribers');
+  let eventedObj = EventedObject.create();
+  let eventedObj2 = EventedObject.create();
+
+  assert.throws(() => task.subscribe(Ember.Object.create()), () => true, 'Non evented objects should throw an error');
+
+  task.subscribe(eventedObj);
+  task.subscribe(eventedObj2);
+  assert.equal(subscribers.length, 2, 'Should have 2 subscribers');
+
+  task.unsubscribe(EventedObject.create());
+  assert.equal(subscribers.length, 2, 'Should have 2 subscribers');
+
+  task.unsubscribe(eventedObj);
+  assert.equal(subscribers.length, 1, 'Should have 1 subscriber');
+
+  task.unsubscribe(eventedObj2);
+  assert.equal(subscribers.length, 0, 'Should have 0 subscribers');
 });
