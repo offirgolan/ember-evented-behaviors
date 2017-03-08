@@ -3,30 +3,56 @@ import WeakMap from 'ember-weakmap';
 import gatherEventKeys from 'ember-evented-behaviors/utils/gather-event-keys';
 
 const {
-  get
+  get,
+  guidFor,
+  computed
 } = Ember;
 
-export default class BehaviorEvent {
-  constructor(name, target, method, once = false) {
-    this.target = target;
-    this.name = name;
-    this.method = method;
-    this.once = once;
-    this.listeners = new WeakMap();
-    this.methodInvoked = new WeakMap();
+export default Ember.Object.extend({
+  // Required
+  name: null,
+  target: null,
+  method: null,
 
-    this.isEventedEvent = name.indexOf('onEvent:') === 0;
-    this._method = typeof method === 'string' ? get(target, method) : method;
-  }
+  // Optional
+  once: false,
+  priority: 0,
+
+  // Private
+  listeners: computed(() => new WeakMap()),
+  methodInvoked: computed(() => new WeakMap()),
+
+  id: computed(function() {
+    return guidFor(this);
+  }).readOnly(),
+
+  invokableMethod: computed('method', function() {
+    let method = this.get('method');
+    let target = this.get('target');
+
+    return typeof method === 'string' ? get(target, method) : method;
+  }).readOnly(),
+
+  isOnEvent: computed('name', function() {
+    return this.get('name').indexOf('onEvent:') === 0;
+  }).readOnly(),
+
+  uniqueName: computed('name', 'id', 'isOnEvent', function() {
+    let name = this.get('name');
+    let id = this.get('id');
+    let isOnEvent = this.get('isOnEvent');
+
+    return isOnEvent ? `${id}.${name}` : name;
+  }).readOnly(),
 
   subscribe(obj) {
-    let { listeners } = this;
+    let listeners = this.get('listeners');
 
     if (!listeners.has(obj)) {
       let objListeners = [ this._listenerFor(obj) ];
 
-      if (this.isEventedEvent) {
-        objListeners.push(this._eventedListenerFor(obj));
+      if (this.get('isOnEvent')) {
+        objListeners.push(this._onEventListenerFor(obj));
       }
 
       objListeners.forEach((listener) => {
@@ -35,10 +61,10 @@ export default class BehaviorEvent {
 
       listeners.set(obj, objListeners);
     }
-  }
+  },
 
   unsubscribe(obj) {
-    let { listeners } = this;
+    let listeners = this.get('listeners');
 
     if (listeners.has(obj)) {
       let objListeners = listeners.get(obj);
@@ -49,7 +75,7 @@ export default class BehaviorEvent {
 
       listeners.delete(obj);
     }
-  }
+  },
 
   /**
    * If a behavior event is registered via `onEvent`, then we need to listen
@@ -57,9 +83,9 @@ export default class BehaviorEvent {
    * `onEvent:click:meta+shift`, we listen for all the `click` events on the
    * object and trigger this event if the keys match.
    */
-  _eventedListenerFor(obj) {
+  _onEventListenerFor(obj) {
     // jscs:disable
-    let nameSegments = this.name.split(':');
+    let nameSegments = this.get('name').split(':');
     let eventName = nameSegments[1];
     let keysString = nameSegments[2] || '';
     // jscs:enable
@@ -70,27 +96,30 @@ export default class BehaviorEvent {
         let event = args.pop();
 
         if (keysString === gatherEventKeys(event).join('+')) {
-          obj.trigger(this.name, ...args, event);
+          obj.trigger(this.get('uniqueName'), ...args, event);
         }
       }
     };
-  }
+  },
 
   _listenerFor(obj) {
     return {
-      name: this.name,
-      target: this.target,
+      name: this.get('uniqueName'),
+      target: this.get('target'),
       method: (...args) => {
-        if (this.once) {
-          if (this.methodInvoked.has(obj)) {
+        let methodInvoked = this.get('methodInvoked');
+        let once = this.get('once');
+
+        if (once) {
+          if (methodInvoked.has(obj)) {
             return;
           }
 
-          this.methodInvoked.set(obj, true);
+          methodInvoked.set(obj, true);
         }
 
-        this._method.call(this.target, obj, ...args);
+        this.get('invokableMethod').call(this.get('target'), obj, ...args);
       }
     };
   }
-}
+});

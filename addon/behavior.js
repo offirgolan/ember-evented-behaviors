@@ -43,10 +43,12 @@ export default Ember.Object.extend({
       let foundEvent = this._findEvent(method, name, once);
 
       if (!foundEvent) {
-        let behaviorEvent = new BehaviorEvent(name, this, method, once);
+        let behaviorEvent = BehaviorEvent.create({ name, method, once, target: this });
 
         registrants.forEach((s) => behaviorEvent.subscribe(s));
-        events.pushObject(behaviorEvent);
+
+        // Insert at the beginning to preserve order
+        events.insertAt(0, behaviorEvent);
       }
     });
   },

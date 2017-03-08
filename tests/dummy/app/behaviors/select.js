@@ -10,10 +10,21 @@ export default Behavior.extend({
   items: null,
 
   subscribeEvents() {
+    this.subscribe(this.one, onEvent('click'));
+    this.subscribe(this.two, onEvent('click'));
+
     this.subscribe('selectOne', [ onEvent('click'), onEvent('onClick', 'shift+cmd') ]);
     this.subscribe(this.selectOneShift, onEvent('onClick', 'shift'), true);
     this.subscribe('selectAll', keyDown('cmd+KeyA'));
     this.subscribe('unselectAll', keyDown('cmd+KeyU'));
+  },
+
+  one() {
+    console.log('One');
+  },
+
+  two() {
+    console.log('Two');
   },
 
   selectOne() {
