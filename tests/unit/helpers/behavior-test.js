@@ -1,11 +1,11 @@
-// import { task } from 'dummy/helpers/task';
+// import { behavior } from 'dummy/helpers/behavior';
 // import { module, test } from 'qunit';
 //
-// module('Unit | Helper | task');
+// module('Unit | Helper | behavior');
 //
 // // Replace this with your real tests.
 // test('it works', function(assert) {
-//   let result = task([42]);
+//   let result = behavior([42]);
 //   assert.ok(result);
 // });
 //

@@ -1,6 +1,6 @@
 import Ember from 'ember';
-import TaskEvent from 'ember-evented-tasks/-private/task-event';
-import isEventedObject from 'ember-evented-tasks/utils/is-evented-object';
+import BehaviorEvent from 'ember-evented-behaviors/-private/behavior-event';
+import isEventedObject from 'ember-evented-behaviors/utils/is-evented-object';
 
 const {
   assert,
@@ -14,72 +14,72 @@ export default Ember.Object.extend({
 
   // Private
   _events: null,
-  _subscribers: null,
+  _registrants: null,
 
   init() {
     this._super(...arguments);
 
     this.set('_events', emberArray([]));
-    this.set('_subscribers', emberArray([]));
+    this.set('_registrants', emberArray([]));
 
-    this.registerEvents();
+    this.subscribeEvents();
   },
 
   destroy() {
     this._super(...arguments);
 
-    this.get('_subscribers').forEach((s) => this.unsubscribe(s));
+    this.get('_registrants').forEach((s) => this.unsubscribe(s));
     this.set('_events', null);
-    this.set('_subscribers', null);
+    this.set('_registrants', null);
   },
 
-  registerEvents() {},
+  subscribeEvents() {},
 
-  register(method, eventNames, once = false) {
+  subscribe(method, eventNames, once = false) {
     let events = this.get('_events');
-    let subscribers = this.get('_subscribers');
+    let registrants = this.get('_registrants');
 
     makeArray(eventNames).forEach((name) => {
       let foundEvent = this._findEvent(method, name, once);
 
       if (!foundEvent) {
-        let taskEvent = new TaskEvent(name, this, method, once);
+        let behaviorEvent = new BehaviorEvent(name, this, method, once);
 
-        subscribers.forEach((s) => taskEvent.subscribe(s));
-        events.pushObject(taskEvent);
+        registrants.forEach((s) => behaviorEvent.subscribe(s));
+        events.pushObject(behaviorEvent);
       }
     });
   },
 
-  unregister(method, eventNames, once = false) {
+  unsubscribe(method, eventNames, once = false) {
     let events = this.get('_events');
-    let subscribers = this.get('_subscribers');
+    let registrants = this.get('_registrants');
 
     makeArray(eventNames).forEach((name) => {
       let foundEvent = this._findEvent(method, name, once);
 
       if (foundEvent) {
-        subscribers.forEach((s) => foundEvent.unsubscribe(s));
+        registrants.forEach((s) => foundEvent.unsubscribe(s));
         events.removeObject(foundEvent);
       }
     });
   },
 
-  subscribe(obj) {
-    let subscribers = this.get('_subscribers');
+  register(obj) {
+    let registrants = this.get('_registrants');
 
     assert(`${obj} must be evented.`, isEventedObject(obj));
 
-    if (!subscribers.includes(obj)) {
-      obj.__ee_tasks__ = obj.__ee_tasks__ || emberArray([]);
+    if (!registrants.includes(obj)) {
+      obj.__ee_behaviors__ = obj.__ee_behaviors__ || emberArray([]);
 
-      this._subscribe(obj);
-      subscribers.addObject(obj);
-      obj.__ee_tasks__.addObject(this);
+      this._register(obj);
+      registrants.addObject(obj);
+      obj.__ee_behaviors__.addObject(this);
     }
   },
 
-  _subscribe(obj) {
+  _register(obj) {
     let disabled = this.get('disabled');
     let events = this.get('_events');
 
@@ -90,17 +90,17 @@ export default Ember.Object.extend({
     events.forEach((event) => event.subscribe(obj));
   },
 
-  unsubscribe(obj) {
-    let subscribers = this.get('_subscribers');
+  unregister(obj) {
+    let registrants = this.get('_registrants');
 
-    if (subscribers.includes(obj)) {
-      this._unsubscribe(obj);
-      subscribers.removeObject(obj);
-      obj.__ee_tasks__.removeObject(this);
+    if (registrants.includes(obj)) {
+      this._unregister(obj);
+      registrants.removeObject(obj);
+      obj.__ee_behaviors__.removeObject(this);
     }
   },
 
-  _unsubscribe(obj) {
+  _unregister(obj) {
     this.get('_events').forEach((event) => event.unsubscribe(obj));
   },
 
@@ -116,12 +116,12 @@ export default Ember.Object.extend({
 
   _disabledDidChange: observer('disabled', function() {
     let disabled = this.get('disabled');
-    let subscribers = this.get('_subscribers');
+    let registrants = this.get('_registrants');
 
     if (disabled) {
-      subscribers.forEach((s) => this._unsubscribe(s));
+      registrants.forEach((s) => this._unregister(s));
     } else {
-      subscribers.forEach((s) => this._subscribe(s));
+      registrants.forEach((s) => this._register(s));
     }
   })
 });

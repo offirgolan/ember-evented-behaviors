@@ -1,7 +1,7 @@
-# Ember Evented Tasks
+# Ember Evented Behaviors
 
-[![Build Status](https://travis-ci.org/offirgolan/ember-evented-tasks.svg)](https://travis-ci.org/offirgolan/ember-evented-tasks)
-[![npm version](https://badge.fury.io/js/ember-evented-tasks.svg)](http://badge.fury.io/js/ember-evented-tasks)
+[![Build Status](https://travis-ci.org/offirgolan/ember-evented-behaviors.svg)](https://travis-ci.org/offirgolan/ember-evented-behaviors)
+[![npm version](https://badge.fury.io/js/ember-evented-behaviors.svg)](http://badge.fury.io/js/ember-evented-behaviors)
 
 ## Features
 
@@ -9,7 +9,7 @@
 ## Installation
 
 ```
-ember install ember-evented-tasks
+ember install ember-evented-behaviors
 ```
 
 ## Helpful Links
@@ -17,25 +17,25 @@ ember install ember-evented-tasks
 - ### [Changelog](CHANGELOG.md)
 
 ## Looking for help?
-If it is a bug [please open an issue on GitHub](http://github.com/offirgolan/ember-evented-tasks/issues).
+If it is a bug [please open an issue on GitHub](http://github.com/offirgolan/ember-evented-behaviors/issues).
 
 ## Usage
 
-### Creating a New Task
+### Creating a New Behavior
 
 ```
-ember generate task my-task
+ember generate behavior my-behavior
 ```
 
 ```js
-// tasks/my-task.js
+// behaviors/my-behavior.js
 
 import Ember from 'ember';
-import Task, { onEvent } from 'ember-evented-tasks';
+import Behavior, { onEvent } from 'ember-evented-behaviors';
 import { keyDown } from 'ember-keyboard';
 
-export default Task.extend({
-  registerEvents() {
+export default Behavior.extend({
+  subscribeEvents() {
     this.register('shiftClick', onEvent('click', 'shift'));
     this.register('selectAll', keyDown('cmd+KeyA'));
   },
@@ -46,36 +46,36 @@ export default Task.extend({
 });
 ```
 
-### Subscribing to a Task
+### Subscribing to a Behavior
 
 ```js
 // components/my-component.js
 
 import Ember from 'ember';
 import { EKMixin } from 'ember-keyboard';
-import { ETMixin } from 'ember-evented-tasks';
+import { ETMixin } from 'ember-evented-behaviors';
 
 export default Ember.Component.extend(EKMixin, ETMixin, {
-  tasks: Ember.inject.service(),
+  behaviors: Ember.inject.service(),
 
   init() {
     this._super(...arguments);
 
-    let tasks = this.get('tasks');
+    let behaviors = this.get('behaviors');
 
-    this.subscribeTasks([
-      tasks.createTask('my-task', { foo: 'bar' })
+    this.subscribeBehaviors([
+      behaviors.createBehavior('my-behavior', { foo: 'bar' })
     ]);
   }
 });
 ```
 
-## Task API
+## Behavior API
 
-### `registerEvents`
+### `subscribeEvents`
 
 ```js
-registerEvents() {
+subscribeEvents() {
   this.register('shiftClick', onEvent('click', 'shift'));
   this.register('selectAll', keyDown('cmd+KeyA'));
 }

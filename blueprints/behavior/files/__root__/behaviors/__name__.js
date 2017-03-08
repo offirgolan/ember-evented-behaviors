@@ -1,8 +1,8 @@
 import Ember from 'ember';
-import Task, { onEvent } from 'ember-evented-tasks';
+import Behavior, { onEvent } from 'ember-evented-behaviors';
 
-export default Task.extend({
-  registerEvents() {
+export default Behavior.extend({
+  subscribeEvents() {
     this.register('onShiftClick', onEvent('click', 'shift'));
   },
 

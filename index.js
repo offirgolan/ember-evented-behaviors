@@ -2,5 +2,5 @@
 'use strict';
 
 module.exports = {
-  name: 'ember-evented-tasks'
+  name: 'ember-evented-behaviors'
 };

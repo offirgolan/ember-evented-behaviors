@@ -1,7 +1,7 @@
 import Ember from 'ember';
 import layout from '../templates/components/selectable-list';
 import { EKMixin, EKOnFocusMixin } from 'ember-keyboard';
-import { ETMixin } from 'ember-evented-tasks';
+import { ETMixin } from 'ember-evented-behaviors';
 
 const {
   inject,
@@ -10,7 +10,7 @@ const {
 
 export default Ember.Component.extend(EKMixin, EKOnFocusMixin, ETMixin, {
   layout,
-  tasks: inject.service(),
+  behaviors: inject.service(),
 
   items: computed(function() {
     return [{
@@ -36,11 +36,11 @@ export default Ember.Component.extend(EKMixin, EKOnFocusMixin, ETMixin, {
   init() {
     this._super(...arguments);
 
-    let tasks = this.get('tasks');
+    let behaviors = this.get('behaviors');
     let items = this.get('items');
 
-    this.subscribeTasks([
-      tasks.createTask('select', { items })
+    this.registerBehaviors([
+      behaviors.createBehavior('select', { items })
     ]);
   }
 });

@@ -1,19 +1,19 @@
 import Ember from 'ember';
-import Task, { onEvent } from 'ember-evented-tasks';
+import Behavior, { onEvent } from 'ember-evented-behaviors';
 import { keyDown } from 'ember-keyboard';
 
 const {
   set
 } = Ember;
 
-export default Task.extend({
+export default Behavior.extend({
   items: null,
 
-  registerEvents() {
-    this.register('selectOne', [ onEvent('click'), onEvent('onClick', 'shift+cmd') ]);
-    this.register(this.selectOneShift, onEvent('onClick', 'shift'), true);
-    this.register('selectAll', keyDown('cmd+KeyA'));
-    this.register('unselectAll', keyDown('cmd+KeyU'));
+  subscribeEvents() {
+    this.subscribe('selectOne', [ onEvent('click'), onEvent('onClick', 'shift+cmd') ]);
+    this.subscribe(this.selectOneShift, onEvent('onClick', 'shift'), true);
+    this.subscribe('selectAll', keyDown('cmd+KeyA'));
+    this.subscribe('unselectAll', keyDown('cmd+KeyU'));
   },
 
   selectOne() {

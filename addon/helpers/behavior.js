@@ -5,9 +5,9 @@ const {
 } = Ember;
 
 export default Ember.Helper.extend({
-  eventedTasks: inject.service(),
+  behaviors: inject.service(),
 
   compute([ type ], params = {}) {
-    return this.get('eventedTasks').lookup(type).create(params);
+    return this.get('behaviors').createBehavior(type, params);
   }
 });

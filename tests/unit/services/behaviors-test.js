@@ -1,6 +1,6 @@
 import { moduleFor, test } from 'ember-qunit';
 
-moduleFor('service:tasks', 'Unit | Service | tasks', {
+moduleFor('service:behaviors', 'Unit | Service | behaviors', {
   // Specify the other units that are required for this test.
   // needs: ['service:foo']
 });

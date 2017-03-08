@@ -1,12 +1,12 @@
 import Ember from 'ember';
 import WeakMap from 'ember-weakmap';
-import gatherEventKeys from 'ember-evented-tasks/utils/gather-event-keys';
+import gatherEventKeys from 'ember-evented-behaviors/utils/gather-event-keys';
 
 const {
   get
 } = Ember;
 
-export default class TaskEvent {
+export default class BehaviorEvent {
   constructor(name, target, method, once = false) {
     this.target = target;
     this.name = name;
@@ -52,7 +52,7 @@ export default class TaskEvent {
   }
 
   /**
-   * If a task event is registered via `onEvent`, then we need to listen
+   * If a behavior event is registered via `onEvent`, then we need to listen
    * to the general event type. For exmaple, if we have an event name of
    * `onEvent:click:meta+shift`, we listen for all the `click` events on the
    * object and trigger this event if the keys match.
