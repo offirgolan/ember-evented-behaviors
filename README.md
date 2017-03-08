@@ -36,12 +36,16 @@ import { keyDown } from 'ember-keyboard';
 
 export default Behavior.extend({
   subscribeEvents() {
-    this.register('shiftClick', onEvent('click', 'shift'));
-    this.register('selectAll', keyDown('cmd+KeyA'));
+    this.subscribe('shiftClick', onEvent('click', 'shift'));
+    this.subscribe(this.selectAll, keyDown('cmd+KeyA'));
   },
 
-  onShiftClick(/* context, event */) {
+  shiftClick(/* context, event */) {
     // Do something on shift + click
+  },
+
+  selectAll(/* context, event */) {
+    // Do something on cmd + A
   }
 });
 ```
@@ -63,7 +67,7 @@ export default Ember.Component.extend(EKMixin, ETMixin, {
 
     let behaviors = this.get('behaviors');
 
-    this.subscribeBehaviors([
+    this.registerBehaviors([
       behaviors.createBehavior('my-behavior', { foo: 'bar' })
     ]);
   }
@@ -76,33 +80,33 @@ export default Ember.Component.extend(EKMixin, ETMixin, {
 
 ```js
 subscribeEvents() {
-  this.register('shiftClick', onEvent('click', 'shift'));
-  this.register('selectAll', keyDown('cmd+KeyA'));
+  this.subscribe('shiftClick', onEvent('click', 'shift'));
+  this.subscribe('selectAll', keyDown('cmd+KeyA'));
 }
-```
-
-### `register`
-
-```js
-register(methodNameOrCallback, eventNames, once = false)
-register('onClick', [ onEvent('click'), onEvent('onClick') ], true);
-```
-
-### `unregister`
-
-```js
-unregister(methodNameOrCallback, eventNames, once = false)
-unregister('onClick', [ onEvent('click'), onEvent('onClick') ], true);
 ```
 
 ### `subscribe`
 
 ```js
-subscribe(object)
+subscribe(methodNameOrCallback, eventNames, once = false)
+subscribe('onClick', [ onEvent('click'), onEvent('onClick') ], true);
 ```
 
 ### `unsubscribe`
 
 ```js
-unsubscribe(object)
+unsubscribe(methodNameOrCallback, eventNames, once = false)
+unsubscribe('onClick', [ onEvent('click'), onEvent('onClick') ], true);
+```
+
+### `register`
+
+```js
+register(object)
+```
+
+### `unregister`
+
+```js
+unregister(object)
 ```
