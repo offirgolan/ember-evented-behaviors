@@ -21,7 +21,7 @@ If it is a bug [please open an issue on GitHub](http://github.com/offirgolan/emb
 
 ## Usage
 
-### Creating a New Behavior
+### Creating a Behavior
 
 ```
 ember generate behavior my-behavior
@@ -50,7 +50,7 @@ export default Behavior.extend({
 });
 ```
 
-### Subscribing to a Behavior
+### Register a Behavior
 
 ```js
 // components/my-component.js
