@@ -1,8 +1,8 @@
 import Ember from 'ember';
 import { module, test } from 'qunit';
-import Behavior, { onEvent, ETMixin } from 'ember-evented-behaviors';
+import Behavior, { onEvent, EBMixin } from 'ember-evented-behaviors';
 
-const EventedObject = Ember.Object.extend(ETMixin);
+const EventedObject = Ember.Object.extend(EBMixin);
 
 const {
   run

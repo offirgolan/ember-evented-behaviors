@@ -1,14 +1,14 @@
 import Ember from 'ember';
 import layout from '../templates/components/selectable-list';
 import { EKMixin, EKOnFocusMixin } from 'ember-keyboard';
-import { ETMixin } from 'ember-evented-behaviors';
+import { EBMixin } from 'ember-evented-behaviors';
 
 const {
   inject,
   computed
 } = Ember;
 
-export default Ember.Component.extend(EKMixin, EKOnFocusMixin, ETMixin, {
+export default Ember.Component.extend(EKMixin, EKOnFocusMixin, EBMixin, {
   layout,
   behaviors: inject.service(),
 

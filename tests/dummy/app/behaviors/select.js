@@ -16,7 +16,7 @@ export default Behavior.extend({
     this.subscribe('selectOne', [ onEvent('click'), onEvent('onClick', 'shift+cmd') ]);
     this.subscribe(this.selectOneShift, onEvent('onClick', 'shift'), true);
     this.subscribe('selectAll', keyDown('cmd+KeyA'));
-    this.subscribe('unselectAll', keyDown('cmd+KeyU'));
+    this.subscribe('unselectAll', keyDown('cmd+KeyZ'));
   },
 
   one() {

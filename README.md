@@ -57,9 +57,9 @@ export default Behavior.extend({
 
 import Ember from 'ember';
 import { EKMixin } from 'ember-keyboard';
-import { ETMixin } from 'ember-evented-behaviors';
+import { EBMixin } from 'ember-evented-behaviors';
 
-export default Ember.Component.extend(EKMixin, ETMixin, {
+export default Ember.Component.extend(EKMixin, EBMixin, {
   behaviors: Ember.inject.service(),
 
   init() {
