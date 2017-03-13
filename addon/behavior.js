@@ -14,13 +14,13 @@ export default Ember.Object.extend({
 
   // Private
   _events: null,
-  _registrants: null,
+  _receivers: null,
 
   init() {
     this._super(...arguments);
 
     this.set('_events', emberArray([]));
-    this.set('_registrants', emberArray([]));
+    this.set('_receivers', emberArray([]));
 
     this.subscribeEvents();
   },
@@ -28,16 +28,16 @@ export default Ember.Object.extend({
   destroy() {
     this._super(...arguments);
 
-    this.get('_registrants').forEach((s) => this.unsubscribe(s));
+    this.get('_receivers').forEach((r) => this.unsubscribe(r));
     this.set('_events', null);
-    this.set('_registrants', null);
+    this.set('_receivers', null);
   },
 
   subscribeEvents() {},
 
   subscribe(method, eventNames, once = false) {
     let events = this.get('_events');
-    let registrants = this.get('_registrants');
+    let receivers = this.get('_receivers');
 
     makeArray(eventNames).forEach((name) => {
       let foundEvent = this._findEvent(method, name, once);
@@ -45,65 +45,61 @@ export default Ember.Object.extend({
       if (!foundEvent) {
         let behaviorEvent = BehaviorEvent.create({ name, method, once, target: this });
 
-        registrants.forEach((s) => behaviorEvent.subscribe(s));
-
         // Insert at the beginning to preserve order
         events.insertAt(0, behaviorEvent);
+
+        // Subscribe the new event to all current receivers
+        receivers.forEach((s) => behaviorEvent.subscribe(s));
       }
     });
   },
 
   unsubscribe(method, eventNames, once = false) {
     let events = this.get('_events');
-    let registrants = this.get('_registrants');
+    let receivers = this.get('_receivers');
 
     makeArray(eventNames).forEach((name) => {
       let foundEvent = this._findEvent(method, name, once);
 
       if (foundEvent) {
-        registrants.forEach((s) => foundEvent.unsubscribe(s));
+        receivers.forEach((r) => foundEvent.unsubscribe(r));
         events.removeObject(foundEvent);
       }
     });
   },
 
-  register(obj) {
-    let registrants = this.get('_registrants');
+  register(receiver) {
+    let receivers = this.get('_receivers');
 
-    assert(`${obj} must be evented.`, isEventedObject(obj));
+    assert(`${receiver} must be evented.`, isEventedObject(receiver));
 
-    if (!registrants.includes(obj)) {
-      obj.__ee_behaviors__ = obj.__ee_behaviors__ || emberArray([]);
+    if (!receivers.includes(receiver)) {
+      receiver.__ee_behaviors__ = receiver.__ee_behaviors__ || emberArray([]);
 
-      this._register(obj);
-      registrants.addObject(obj);
-      obj.__ee_behaviors__.addObject(this);
+      this._subscribeToEvents(receiver);
+      receivers.addObject(receiver);
+      receiver.__ee_behaviors__.addObject(this);
     }
   },
 
-  _register(obj) {
-    let disabled = this.get('disabled');
-    let events = this.get('_events');
-
-    if (disabled) {
-      return;
-    }
-
-    events.forEach((event) => event.subscribe(obj));
-  },
-
-  unregister(obj) {
-    let registrants = this.get('_registrants');
-
-    if (registrants.includes(obj)) {
-      this._unregister(obj);
-      registrants.removeObject(obj);
-      obj.__ee_behaviors__.removeObject(this);
+  _subscribeToEvents(receiver) {
+    if (!this.get('disabled')) {
+      this.get('_events').invoke('subscribe', receiver);
     }
   },
 
-  _unregister(obj) {
-    this.get('_events').forEach((event) => event.unsubscribe(obj));
+  unregister(receiver) {
+    let receivers = this.get('_receivers');
+
+    if (receivers.includes(receiver)) {
+      this._unsubscribeFromEvents(receiver);
+      receivers.removeObject(receiver);
+      receiver.__ee_behaviors__.removeObject(this);
+    }
+  },
+
+  _unsubscribeFromEvents(receiver) {
+    this.get('_events').invoke('unsubscribe', receiver);
   },
 
   _findEvent(method, name, once) {
@@ -118,12 +114,12 @@ export default Ember.Object.extend({
 
   _disabledDidChange: observer('disabled', function() {
     let disabled = this.get('disabled');
-    let registrants = this.get('_registrants');
+    let receivers = this.get('_receivers');
 
     if (disabled) {
-      registrants.forEach((s) => this._unregister(s));
+      receivers.forEach((s) => this._unsubscribeFromEvents(s));
     } else {
-      registrants.forEach((s) => this._register(s));
+      receivers.forEach((s) => this._subscribeToEvents(s));
     }
   })
 });

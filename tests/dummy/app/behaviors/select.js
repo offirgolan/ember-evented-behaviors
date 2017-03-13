@@ -20,15 +20,15 @@ export default Behavior.extend({
   },
 
   one() {
-    console.log('One');
+    console.log('Behavior Select: One');
   },
 
   two() {
-    console.log('Two');
+    console.log('Behavior Select: Two');
   },
 
   selectOne() {
-    console.log('Selected one');
+    console.log('Behavior Select: Selected one');
   },
 
   selectOneShift() {
